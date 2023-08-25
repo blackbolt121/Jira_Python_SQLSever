@@ -1,3 +1,6 @@
-import Database.connector
+from Database.connector import cursor
+from Jira_Requests.getRequest import getRequest, jira_rest_api
 
-print(Database.connector.cursor)
+
+print(getRequest(jira_rest_api+"project").content)
+
