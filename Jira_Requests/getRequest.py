@@ -11,6 +11,7 @@ token = getenv("TOKEN")
 
 auth = HTTPBasicAuth(username=email,password=token)
 jira_rest_api = getenv("JIRA_API")
+jira_agile_api = getenv("JIRA_AGILE_API")
 
 def getRequest(url=""):
     return requests.get(url=url, auth=auth)

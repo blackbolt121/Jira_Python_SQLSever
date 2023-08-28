@@ -8,6 +8,7 @@ load_dotenv()
 server = os.getenv("SERVER")
 database = os.getenv("DATABASE")
 
+
 # ENCRYPT defaults to yes starting in ODBC Driver 18. It's good to always specify ENCRYPT=yes on the client side to avoid MITM attacks.
 try:
     string_connection = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';Trusted_Connection=yes;'
