@@ -3,7 +3,7 @@ import pyodbc
 from dotenv import load_dotenv
 
 load_dotenv()
-database=os.getenv("")
+
 
 server = os.getenv("SERVER")
 database = os.getenv("DATABASE")

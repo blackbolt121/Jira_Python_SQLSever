@@ -1,10 +1,23 @@
 import requests
 from requests.auth import HTTPBasicAuth
-import os
+from os import getenv
+from json import loads
+from dotenv import load_dotenv
 
-email = os.getenv("EMAIL")
-token = os.getenv("TOKEN")
+load_dotenv()
+
+email = getenv("EMAIL")
+token = getenv("TOKEN")
+
 auth = HTTPBasicAuth(username=email,password=token)
-jira_rest_api = os.getenv("JIRA_API")
+jira_rest_api = getenv("JIRA_API")
+
 def getRequest(url=""):
     return requests.get(url=url, auth=auth)
+
+def getOnlyJsonRequestContent(url="") -> object:
+    request = getRequest(url=url)
+    if request.status_code != 200:
+        raise Exception("Request failed")
+    requestContent = request.content
+    return loads(requestContent)
