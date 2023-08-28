@@ -99,7 +99,9 @@ CREATE PROCEDURE UpdateInsertProject
     @CategoryID INT,
     @ProjectName VARCHAR(128),
     @ProjectKey VARCHAR(50),
-    @Archived BIT
+    @Archived BIT,
+    @TYPE VARCHAR(50),
+    @ISPRIVATE BIT
 AS
 BEGIN
     MERGE INTO [PROJECT] AS target
@@ -109,7 +111,9 @@ BEGIN
             @CategoryID AS CategoryID,
             @ProjectName AS ProjectName,
             @ProjectKey AS ProjectKey,
-            @Archived AS Archived
+            @Archived AS Archived,
+            @TYPE AS [TYPE],
+            @ISPRIVATE AS [ISPRIVATE]
     ) AS source
     ON (target.ID = source.ProjectID)
     WHEN MATCHED THEN
@@ -117,21 +121,27 @@ BEGIN
             [CATEGORY] = source.CategoryID,
             [NAME] = source.ProjectName,
             [KEY] = source.ProjectKey,
-            ARCHIVED = source.Archived
+            ARCHIVED = source.Archived,
+            [TYPE] = source.[TYPE],
+            ISPRIVATE = source.[ISPRIVATE]
     WHEN NOT MATCHED THEN
         INSERT (
             ID,
             [CATEGORY],
             [NAME],
             [KEY],
-            ARCHIVED
+            ARCHIVED,
+            [TYPE],
+            ISPRIVATE
         )
         VALUES (
             source.ProjectID,
             source.CategoryID,
             source.ProjectName,
             source.ProjectKey,
-            source.Archived
+            source.Archived,
+            source.[TYPE],
+            source.[ISPRIVATE]
         );
 END;
 GO
@@ -475,6 +485,32 @@ BEGIN
             source.NIssuesCompleted,
             source.NIssuesCompletedCommitted,
             source.NIssuesNotCompleted
+        );
+END;
+GO
+CREATE PROCEDURE UpdateInsertStatus
+    @StatusID INT,
+    @StatusName VARCHAR(50)
+AS
+BEGIN
+    MERGE INTO [STATUS] AS target
+    USING (
+        SELECT
+            @StatusID AS StatusID,
+            @StatusName AS StatusName
+    ) AS source
+    ON (target.ID = source.StatusID)
+    WHEN MATCHED THEN
+        UPDATE SET
+            [STATUS] = source.StatusName
+    WHEN NOT MATCHED THEN
+        INSERT (
+            [ID],
+            [STATUS]
+        )
+        VALUES (
+            source.StatusID,
+            source.StatusName
         );
 END;
 GO
