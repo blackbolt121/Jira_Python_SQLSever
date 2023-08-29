@@ -331,27 +331,30 @@ END;
 GO
 CREATE PROCEDURE UpdateInsertIssueType
     @IssueTypeID INT,
-    @IssueTypeName VARCHAR(128)
+    @IssueTypeName VARCHAR(128),
 AS
 BEGIN
     MERGE INTO [ISSUE_TYPE] AS target
     USING (
         SELECT
             @IssueTypeID AS IssueTypeID,
-            @IssueTypeName AS IssueTypeName
+            @IssueTypeName AS IssueTypeName,
+            @IssueCategory AS IssueCategory
     ) AS source
     ON (target.ID = source.IssueTypeID)
     WHEN MATCHED THEN
         UPDATE SET
-            [NAME] = source.IssueTypeName
+            [NAME] = source.IssueTypeName,
     WHEN NOT MATCHED THEN
         INSERT (
-            ID,
-            [NAME]
+            [ID],
+            [NAME],
+            [CATEGORY]
         )
         VALUES (
             source.IssueTypeID,
-            source.IssueTypeName
+            source.IssueTypeName,
+            source.IssueCategory
         );
 END;
 GO
@@ -488,29 +491,66 @@ BEGIN
         );
 END;
 GO
+CREATE PROCEDURE UpdateInsertStatusCategory
+    @ID INT,
+    @Key VARCHAR(25),
+    @Name VARCHAR(50)
+AS
+BEGIN
+    MERGE INTO [STATUS_CATEGORY] AS target
+    USING (
+        SELECT
+            @ID AS ID,
+            @Name AS [NAME],
+            @KEY AS [KEY]
+    ) AS source
+    ON (target.ID = source.ID)
+    WHEN MATCHED THEN
+        UPDATE SET
+            [NAME] = source.[NAME],
+            [KEY] = source.[KEY]
+    WHEN NOT MATCHED THEN
+        INSERT (
+            [ID],
+            [NAME],
+            [KEY]
+        )
+        VALUES (
+            source.ID,
+            source.[NAME],
+            source.[KEY]
+        );
+END;
+GO
+GO
 CREATE PROCEDURE UpdateInsertStatus
     @StatusID INT,
-    @StatusName VARCHAR(50)
+    @StatusName VARCHAR(50),
+    @StatusCategory INT
 AS
 BEGIN
     MERGE INTO [STATUS] AS target
     USING (
         SELECT
             @StatusID AS StatusID,
-            @StatusName AS StatusName
+            @StatusName AS StatusName,
+            @StatusCategory AS StatusCategory
     ) AS source
     ON (target.ID = source.StatusID)
     WHEN MATCHED THEN
         UPDATE SET
-            [STATUS] = source.StatusName
+            [STATUS] = source.StatusName,
+            [StatusCategory] = source.StatusCategory
     WHEN NOT MATCHED THEN
         INSERT (
             [ID],
-            [STATUS]
+            [STATUS],
+            [CATEGORY]
         )
         VALUES (
             source.StatusID,
-            source.StatusName
+            source.StatusName,
+            source.StatusCategory
         );
 END;
 GO

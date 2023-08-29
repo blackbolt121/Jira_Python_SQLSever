@@ -4,10 +4,11 @@ from GetProperties import getProperty
 
 def loadRoles():
     try:
-        roles = getOnlyJsonRequestContent(f"{jira_rest_api}role")
-        for role in roles:
+        issue_types = getOnlyJsonRequestContent(f"{jira_rest_api}role")
+        for issue_type in issue_types:
             data = [getProperty(role, prop) for prop in ["id", "name"]]
-            cursor.execute("EXEC UpdateInsertIssueType @IssueTypeID = ?, @IssueTypeName = ?;", data)
+            data.append(getProperty())
+            cursor.execute("EXEC UpdateInsertIssueType @IssueTypeID = ?, @IssueTypeName = ?, @IssueTypeCategory = ?;", data)
             cursor.commit()
     except Exception as ex:
         print(ex.args)
