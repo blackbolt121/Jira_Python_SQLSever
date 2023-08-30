@@ -2,13 +2,12 @@ from Jira_Requests.getRequest import getOnlyJsonRequestContent, jira_rest_api
 from Database.connector import cursor
 from GetProperties import getProperty
 
-def loadRoles():
+def loadIssueType():
     try:
-        issue_types = getOnlyJsonRequestContent(f"{jira_rest_api}role")
+        issue_types = getOnlyJsonRequestContent(f"{jira_rest_api}issuetype")
         for issue_type in issue_types:
-            data = [getProperty(role, prop) for prop in ["id", "name"]]
-            data.append(getProperty())
-            cursor.execute("EXEC UpdateInsertIssueType @IssueTypeID = ?, @IssueTypeName = ?, @IssueTypeCategory = ?;", data)
+            data = [getProperty(issue_type, prop) for prop in ["id", "name", "hierarchyLevel"]]
+            cursor.execute("EXEC UpdateInsertIssueType @IssueTypeID = ?,@IssueTypeName = ?, @IssueHierarchy = ?;", data)
             cursor.commit()
     except Exception as ex:
         print(ex.args)

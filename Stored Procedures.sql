@@ -1,3 +1,4 @@
+USE JIRA
 GO
 CREATE PROCEDURE InsertOrUpdateCategory
     @CategoryID INT,
@@ -19,17 +20,43 @@ CREATE PROCEDURE InsertOrUpdateProject
     @ProjectName VARCHAR(255),
 	@ProjectCategory INT,
 	@ProjectKey VARCHAR(50),
-	@Archived BIT
+	@Archived BIT,
+	@TYPE AS VARCHAR(50),
+	@ISPRIVATE AS BIT
 AS
 BEGIN
     MERGE INTO PROJECT AS target
-    USING (SELECT @ProjectID AS ProjectID, @ProjectCategory AS CategoryID, @ProjectName AS ProjectName, @ProjectKey as ProjectKey, @Archived AS Archived) AS source
+    USING (SELECT @ProjectID AS ProjectID, 
+				  @ProjectCategory AS CategoryID, 
+				  @ProjectName AS ProjectName, 
+				  @ProjectKey as ProjectKey, 
+				  @Archived AS Archived,
+				  @TYPE AS [TYPE],
+				  @ISPRIVATE AS [ISPRIVATE]
+				  ) AS source
     ON (target.ID = source.ProjectID)
     WHEN MATCHED THEN
-        UPDATE SET target.[NAME] = source.ProjectName, target.[CATEGORY] = source.CategoryID, target.[KEY] = source.ProjectKey, target.[ARCHIVED] = source.Archived  
+        UPDATE SET target.[NAME] = source.ProjectName, 
+				   target.[CATEGORY] = source.CategoryID, 
+				   target.[KEY] = source.ProjectKey, 
+				   target.[ARCHIVED] = source.Archived,
+				   target.[TYPE] = source.[TYPE],
+				   target.[ISPRIVATE] = source.[ISPRIVATE]
     WHEN NOT MATCHED THEN
-        INSERT (ID, [NAME], [CATEGORY], [KEY], [ARCHIVED])
-        VALUES (source.CategoryID, source.ProjectName, source.CategoryID, source.ProjectKey, source.Archived);
+        INSERT (ID, 
+				[NAME], 
+				[CATEGORY], 
+				[KEY], 
+				[ARCHIVED], 
+				[TYPE], 
+				[ISPRIVATE])
+        VALUES (source.CategoryID, 
+				source.ProjectName, 
+				source.CategoryID, 
+				source.ProjectKey, 
+				source.Archived, 
+				source.[TYPE], 
+				source.[ISPRIVATE]);
 END;
 GO
 CREATE PROCEDURE InsertOrUpdateProjectRole
@@ -92,6 +119,23 @@ BEGIN
     WHEN NOT MATCHED THEN
         INSERT (ACCOUNTID, DISPLAYNAME, EMAILADDRESS, ACTIVE, LASTSEEN, ADDEDTOORG)
         VALUES (source.ACCOUNTID, source.DISPLAYNAME, source.EMAILADDRESS, source.ACTIVE, source.LASTSEEN, source.ADDEDTOORG);
+END;
+GO
+CREATE PROCEDURE InsertOrUpdateUserWithOutDate
+    @ACCOUNTID VARCHAR(128),
+	@DISPLAYNAME VARCHAR(255),
+	@EMAILADDRESS VARCHAR(255),
+    @ACTIVE VARCHAR(25)
+AS
+BEGIN
+    MERGE INTO USERS AS target
+    USING (SELECT @ACCOUNTID AS ACCOUNTID, @DISPLAYNAME AS DISPLAYNAME, @EMAILADDRESS AS EMAILADDRESS, @ACTIVE AS ACTIVE) AS source
+    ON (target.ACCOUNTID = source.ACCOUNTID)
+	WHEN MATCHED THEN
+		UPDATE SET DISPLAYNAME = source.DISPLAYNAME, ACTIVE = source.ACTIVE, EMAILADDRESS = source.EMAILADDRESS
+    WHEN NOT MATCHED THEN
+        INSERT (ACCOUNTID, DISPLAYNAME, EMAILADDRESS, ACTIVE)
+        VALUES (source.ACCOUNTID, source.DISPLAYNAME, source.EMAILADDRESS, source.ACTIVE);
 END;
 GO
 CREATE PROCEDURE UpdateInsertProject
@@ -332,6 +376,7 @@ GO
 CREATE PROCEDURE UpdateInsertIssueType
     @IssueTypeID INT,
     @IssueTypeName VARCHAR(128),
+	@IssueHierarchy INT
 AS
 BEGIN
     MERGE INTO [ISSUE_TYPE] AS target
@@ -339,22 +384,23 @@ BEGIN
         SELECT
             @IssueTypeID AS IssueTypeID,
             @IssueTypeName AS IssueTypeName,
-            @IssueCategory AS IssueCategory
+            @IssueHierarchy AS IssueHierarchy
     ) AS source
     ON (target.ID = source.IssueTypeID)
     WHEN MATCHED THEN
         UPDATE SET
             [NAME] = source.IssueTypeName,
+			[HIERARCHY_LEVEL] = source.IssueHierarchy
     WHEN NOT MATCHED THEN
         INSERT (
             [ID],
             [NAME],
-            [CATEGORY]
+            [HIERARCHY_LEVEL]
         )
         VALUES (
             source.IssueTypeID,
             source.IssueTypeName,
-            source.IssueCategory
+            source.IssueHierarchy
         );
 END;
 GO
@@ -540,7 +586,7 @@ BEGIN
     WHEN MATCHED THEN
         UPDATE SET
             [STATUS] = source.StatusName,
-            [StatusCategory] = source.StatusCategory
+            [Category] = source.StatusCategory
     WHEN NOT MATCHED THEN
         INSERT (
             [ID],

@@ -10,17 +10,10 @@ def loadProjects():
             projectsRequest = getOnlyJsonRequestContent(f"{jira_rest_api}project/search?startAt={startAt}")
             projects = projectsRequest["values"]
             for project in projects:
-                projectKey = getProperty(project, "key")
-                projectName = getProperty(project, "name")
-                projectId = getProperty(project, "id")
-                categoryId = getProperty(getProperty(project, "projectCategory"), "id")
-                archived = getProperty(project, "archived")
-                if archived == None:
-                    archived = False
-                style = getProperty(project, "style")
-                isPrivate = getProperty(project, "isPrivate")
-                data = [projectId, categoryId, projectName, projectKey, archived, style, isPrivate]
-                cursor.execute("EXEC UpdateInsertProject @ProjectID = ?, @CategoryID = ?, @ProjectName = ?, @ProjectKey = ?, @Archived = ?, @STYLE = ?, @ISPRIVATE = ?;", data)
+                data = [getProperty(project, prop) for prop in ["id","name","key","archived","style","isPrivate"]]
+                data.insert(1,getProperty(getProperty(project, "projectCategory"), "id"))
+                print(data)
+                cursor.execute("EXEC InsertOrUpdateProject @ProjectID = ?, @ProjectCategory = ?, @ProjectName = ?, @ProjectKey = ?, @Archived = ?, @TYPE = ?, @ISPRIVATE = ?;", data)
                 cursor.commit()
             if projectsRequest["isLast"] == True:
                 flag = False
