@@ -24,7 +24,6 @@ def loadUsersEmailDetails():
     print(r.content)
     print(r)
 
-
 def loadUsersLastSeenDetails():
     org = getenv("ORG_ID")
     api_key = getenv("API_KEY")
