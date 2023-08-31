@@ -9,22 +9,27 @@ from Jira_Objects.Group import loadGroups
 from Jira_Objects.Project_Role import loadRoles
 from Jira_Objects.User import loadUsersByRestAPI, loadUsersEmailDetails
 from Jira_Objects.User_Members import loadUserMembers
+from Jira_Objects.Story import publishMultipleScrumReport
 from Database.GetTableContentInCsv import GenerateCsvFromTable, GenerateCsvFromQuery
-"""
-loadCategories()
-loadProjects()
-loadStatus()
-loadBoards()
-loadRoles()
-loadStatusCategory()
-loadIssueType()
-loadGroups()
-loadRoles()
-loadUsersByRestAPI()
-loadUserMembers()
-loadUsersEmailDetails()
-"""
+from sys import argv
 
+commands = {
+    "categories": loadCategories,
+    "projects" : loadProjects,
+    "status" : loadStatus,
+    "boards" : loadBoards,
+    "roles" : loadRoles,
+    "statusCategory" : loadStatusCategory,
+    "issueType" : loadIssueType,
+    "groups" : loadGroups,
+    "Users" : loadUsersByRestAPI,
+    "UserMembers" : loadUserMembers,
+    "scrum" : publishMultipleScrumReport
+}
 
-
-GenerateCsvFromQuery("SELECT p.name AS 'Project Name', COUNT(b.name) AS 'Board Name' FROM PROJECT p, BOARD b WHERE p.id = b.projectID GROUP BY p.name")
+try:
+    if len(argv) > 1:
+        print(argv[1])
+        commands[argv[1]]()
+except:
+    print("Command not valid...")

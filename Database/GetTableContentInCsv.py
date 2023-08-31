@@ -22,8 +22,6 @@ def GenerateCsvFromQuery(query:str, filename: str = "file.txt"):
         csvFile = DictWriter(f, fieldnames=headers)
         csvFile.writeheader()
         for result in results:
-            print(result)
             values = [ value if not(value == None) else "" for value in result ]
-            print(dict(zip(headers,values)))
             csvFile.writerow(dict(zip(headers,values)))
         f.close()
