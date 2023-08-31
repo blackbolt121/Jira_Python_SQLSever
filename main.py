@@ -26,4 +26,5 @@ loadUsersEmailDetails()
 """
 
 
-GenerateCsvFromQuery(query="""SELECT p.NAME as 'Project Name', COUNT(b.id) as '# Scrum Boards' FROM BOARD b, PROJECT p WHERE b.projectId = p.id AND b.type = 'scrum' GROUP BY p.NAME""")
+
+GenerateCsvFromQuery("SELECT p.name AS 'Project Name', COUNT(b.name) AS 'Board Name' FROM PROJECT p, BOARD b WHERE p.id = b.projectID GROUP BY p.name")
