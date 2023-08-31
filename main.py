@@ -29,7 +29,11 @@ commands = {
 
 try:
     if len(argv) > 1:
-        print(argv[1])
-        commands[argv[1]]()
+        if argv[1] == "all":
+            for key in commands.keys():
+                if key != "scrum":
+                    commands[key]()
+        else:
+            commands[argv[1]]()
 except:
     print("Command not valid...")
